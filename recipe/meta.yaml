@@ -86,6 +86,11 @@ about:
   repository: https://github.com/dottxt-ai/outlines-core
 
 extra:
+  anaconda-services:
+    ref: https://anaconda.zendesk.com/agent/tickets/49522
+    reason: Dependency for vllm
+  recipe-maintainers:
+    - ianaobi
   recipe-maintainers:
     - hadim
     - maresb

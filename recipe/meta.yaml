@@ -1,6 +1,8 @@
-context:
-  name: outlines-core
-  version: 0.1.27
+#context:
+#  name: outlines-core
+#  version: 0.1.27
+{% set name = "outlines-core" %}
+{% set version = "0.1.27" %}
 
 package:
   name: ${{ name|lower }}

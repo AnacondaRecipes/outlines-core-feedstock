@@ -54,7 +54,6 @@ extra:
     reason: Dependency for vllm
   recipe-maintainers:
     - ianaobi
-    - bkreider
   recipe-maintainers:
     - hadim
     - maresb

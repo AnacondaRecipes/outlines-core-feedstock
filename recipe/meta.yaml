@@ -21,13 +21,13 @@ build:
 
 requirements:
   build:
-    - if: build_platform != target_platform
-      then:
-        - python
-        - cross-python_${{ target_platform }}
-        - setuptools >=45
-        - setuptools-scm >=6.2
-        - setuptools-rust
+  #  - if: build_platform != target_platform
+  #    then:
+  #      - python
+  #      - cross-python_${{ target_platform }}
+  #      - setuptools >=45
+  #      - setuptools-scm >=6.2
+  #      - setuptools-rust
 
     - ${{ compiler('rust') }}
     - ${{ compiler('cxx') }}

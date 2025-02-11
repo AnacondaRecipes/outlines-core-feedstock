@@ -15,7 +15,7 @@ build:
   number: 0
 
 requirements:
-   build:
+  build:
     - {{ compiler('rust') }}
     - {{ compiler('cxx') }}
     - cargo-bundle-licenses

@@ -15,11 +15,16 @@ build:
   number: 0
 
 requirements:
+   build:
+    - {{ compiler('rust') }}
+    - {{ compiler('cxx') }}
+    - cargo-bundle-licenses
+    - pkg-config
   host:
     - python >=3.8
     - setuptools
-   # - setuptools-scm
-    #- setuptools-rust
+    - setuptools-scm
+    - setuptools-rust
     - pip
   run:
     - python >=3.8

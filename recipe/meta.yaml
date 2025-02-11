@@ -9,7 +9,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/${{ name[0] }}/${{ name }}/outlines_core-${{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/outlines_core-{{ version }}.tar.gz
   sha256: 594d35c616a90a5da1d172406c8c56ba8a72192964a5f51bb012a3d6710efd22
 
 build:

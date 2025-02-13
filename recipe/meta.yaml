@@ -33,6 +33,7 @@ requirements:
 
 test:
   imports:
+    - outlines_core.fsm.outlines_core_rs
     - outlines_core
   commands:
     - pip check

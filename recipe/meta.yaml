@@ -21,6 +21,8 @@ requirements:
     - cargo-bundle-licenses
     - pkg-config
     - libstdcxx-ng
+    - openssl
+    - libgcc-ng
   host:
     - python >=3.8
     - setuptools
@@ -28,11 +30,15 @@ requirements:
     - setuptools-rust
     - pip
     - libstdcxx-ng
+    - openssl
+    - libgcc-ng
   run:
     - python >=3.8
     - interegular
     - jsonschema
     - libstdcxx-ng
+    - openssl
+    - libgcc-ng
 test:
   imports:
     - outlines_core.fsm.outlines_core_rs

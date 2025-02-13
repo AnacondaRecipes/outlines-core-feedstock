@@ -20,17 +20,19 @@ requirements:
     - {{ compiler('cxx') }}
     - cargo-bundle-licenses
     - pkg-config
+    - libstdcxx-ng
   host:
     - python >=3.8
     - setuptools
     - setuptools-scm
     - setuptools-rust
     - pip
+    - libstdcxx-ng
   run:
     - python >=3.8
     - interegular
     - jsonschema
-
+    - libstdcxx-ng
 test:
   imports:
     - outlines_core.fsm.outlines_core_rs

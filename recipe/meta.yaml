@@ -30,9 +30,11 @@ requirements:
     - setuptools-scm >=6.2
     - setuptools-rust  # Ensure Rust build support
     - wheel
+    - openssl
 
   run:
     - python
+    - openssl
 
 test:
   imports:

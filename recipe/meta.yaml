@@ -39,6 +39,8 @@ test:
     - outlines_core.fsm.outlines_core_rs  # Verify Rust extension loads correctly
   commands:
     - pip check
+  requires:
+    - pip
 
 about:
   home: https://github.com/dottxt-ai/outlines-core

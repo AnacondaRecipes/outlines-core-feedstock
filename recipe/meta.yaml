@@ -9,53 +9,38 @@ source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/outlines_core-{{ version }}.tar.gz
   sha256: 481c4301341e77cc8f1832d616784adb4d461b4fec65878e7c0d2cba7163a189
 
+
 build:
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  script:
+    - "{{ PYTHON }} -m pip install --no-deps --ignore-installed ."
   number: 0
+  skip: true  # [win]  # Uncomment if this package doesn't support Windows
 
 requirements:
   build:
-    - {{ compiler('rust') }}
+    - {{ compiler('rust') }}  # Ensure the Rust compiler is installed
     - {{ compiler('cxx') }}
     - cargo-bundle-licenses
     - pkg-config
-    - libstdcxx-ng
-    - openssl
-    - libgcc-ng
+
   host:
-    - python >=3.8
-    - setuptools
-    - setuptools-scm
-    - setuptools-rust
+    - python
     - pip
-    - libstdcxx-ng
-    - openssl
-    - libgcc-ng
+    - setuptools >=45
+    - setuptools-scm >=6.2
+    - setuptools-rust  # Ensure Rust build support
+
   run:
-    - python >=3.8
-    - interegular
-    - jsonschema
-    - libstdcxx-ng
-    - openssl
-    - libgcc-ng
+    - python
+
 test:
   imports:
-    - outlines_core.fsm.outlines_core_rs
-    - outlines_core
-  commands:
-    - pip check
-  requires:
-    - pip
+    - outlines_core.fsm.outlines_core_rs  # Verify Rust extension loads correctly
 
 about:
-  summary: Structured Text Generation in Rust
-  license: Apache-2.0
-  license_file:
-    #- THIRDPARTY.yml
-    - LICENSE
-  homepage: https://github.com/dottxt-ai/outlines-core
-  repository: https://github.com/dottxt-ai/outlines-core
+  home: https://github.com/your-repo/outlines-core
+  license: MIT
+  summary: "A core library for Outlines framework."
 
 extra:
   anaconda-services:

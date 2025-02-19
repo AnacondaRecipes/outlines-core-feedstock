@@ -41,7 +41,7 @@ test:
     - pip check
 
 about:
-  home: https://github.com/your-repo/outlines-core
+  home: https://github.com/dottxt-ai/outlines-core
   license: MIT
   summary: "A core library for Outlines framework."
 

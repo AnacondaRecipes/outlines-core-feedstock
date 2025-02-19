@@ -22,6 +22,9 @@ requirements:
     - {{ compiler('cxx') }}
     - cargo-bundle-licenses
     - pkg-config
+    - libstdcxx-ng
+    - openssl
+    - libgcc-ng
 
   host:
     - python
@@ -30,11 +33,17 @@ requirements:
     - setuptools-scm >=6.2
     - setuptools-rust  # Ensure Rust build support
     - wheel
+    - libstdcxx-ng
     - openssl
+    - libgcc-ng
 
   run:
     - python
+    - interegular
+    - jsonschema
+    - libstdcxx-ng
     - openssl
+    - libgcc-ng
 
 test:
   imports:

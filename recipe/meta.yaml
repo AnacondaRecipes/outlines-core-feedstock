@@ -21,7 +21,7 @@ requirements:
     - setuptools-scm
     - setuptools-rust
     - pip
-    - outlines_core.fsm.outlines_core_rs
+    - wheel
   run:
     - python 
     - interegular
@@ -41,7 +41,6 @@ requirements:
     - airportsdata
     - pytorch
     - outlines-core ==0.1.26
-    - outlines_core.fsm.outlines_core_rs
 
 test:
   imports:

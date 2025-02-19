@@ -29,6 +29,7 @@ requirements:
     - setuptools >=45
     - setuptools-scm >=6.2
     - setuptools-rust  # Ensure Rust build support
+    - wheel
 
   run:
     - python
@@ -36,6 +37,8 @@ requirements:
 test:
   imports:
     - outlines_core.fsm.outlines_core_rs  # Verify Rust extension loads correctly
+  commands:
+    - pip check
 
 about:
   home: https://github.com/your-repo/outlines-core

@@ -1,51 +1,40 @@
-{% set name = "outlines" %}
-{% set version = "0.0.43" %}
+{% set name = "outlines-core" %}
+{% set version = "0.2.11" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/outlines-{{ version }}.tar.gz
-  sha256: 4a24e853b1d50c61aee76cc45fffc5cf376c10c50caa3b28ebd21fcddc39d83f
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/outlines_core-{{ version }}.tar.gz
+  sha256: dfce56f717ff5083e54cbcfdb66cad243365437fccbb5509adaa7e31e030f1d8
 
 build:
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip: true # [ py<310 or py>312 ]
+
+  script: 
+    - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
+    - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
 
 requirements:
+  build:
+    - {{ compiler('rust') }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ stdlib('c') }}
+    - cargo-bundle-licenses
   host:
-    - python >=3.8
-    - setuptools >=45
-    - setuptools-scm >=6.2
+    - python
     - pip
+    - maturin
+    
   run:
-    - datasets
-    - pyairports
-    - pycountry
-    - tqdm
-    - transformers
-    - python >=3.8
-    - interegular
-    - jinja2
-    - lark
-    - nest-asyncio
-    - numpy
-    - cloudpickle
-    - diskcache
-    - pydantic >=2.0
-    - scipy
-    - pytorch >=2.1.0
-    - numba
-    - joblib
-    - referencing
-    - jsonschema
-    - requests
+    - python
 
 test:
   imports:
-    - outlines
+    - outlines_core
   commands:
     - pip check
   requires:

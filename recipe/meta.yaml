@@ -1,67 +1,75 @@
-{% set name = "outlines" %}
-{% set version = "0.0.43" %}
+{% set name = "outlines-core" %}
+{% set version = "0.1.26" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/outlines-{{ version }}.tar.gz
-  sha256: 4a24e853b1d50c61aee76cc45fffc5cf376c10c50caa3b28ebd21fcddc39d83f
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/outlines_core-{{ version }}.tar.gz
+  sha256: 481c4301341e77cc8f1832d616784adb4d461b4fec65878e7c0d2cba7163a189
 
 build:
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  number: 0
+  # limited by at least one rust package PyO3, that is pinned to a version that only supports up to Python 3.13
+  skip: true # [ py<310 or py>313]
+
+  script: 
+    - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
+    - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 3
+  ignore_run_exports_from:
+    - {{ compiler('cxx') }}
 
 requirements:
+  build:
+    - {{ compiler('rust') }}
+    - {{ compiler('cxx') }}
+    - {{ stdlib('c') }}
+    - cargo-bundle-licenses
+    - pkg-config
+    
   host:
-    - python >=3.8
-    - setuptools >=45
-    - setuptools-scm >=6.2
+
+    - python
     - pip
+    # setuptools and setuptools-scm pinned based on pyproject.toml: https://github.com/dottxt-ai/outlines-core/blob/0.1.26/pyproject.toml
+    - setuptools >45
+    - setuptools-scm >=6.2
+    - setuptools-rust
+    - wheel
   run:
-    - datasets
-    - pyairports
-    - pycountry
-    - tqdm
-    - transformers
-    - python >=3.8
+    - python
     - interegular
-    - jinja2
-    - lark
-    - nest-asyncio
-    - numpy
-    - cloudpickle
-    - diskcache
-    - pydantic >=2.0
-    - scipy
-    - pytorch >=2.1.0
-    - numba
-    - joblib
-    - referencing
     - jsonschema
-    - requests
 
 test:
+  source_files:
+    - tests/
   imports:
-    - outlines
+    - outlines_core
   commands:
     - pip check
   requires:
     - pip
 
 about:
-  home: https://github.com/outlines-dev/outlines
-  doc_url: https://outlines-dev.github.io/outlines
+  home: https://github.com/dottxt-ai/outlines-core
+  
   summary: Probabilistic Generative Model Programming
-  license: Apache-2.0
-  license_file: LICENSE
+  description: |
+    This package provides the core functionality for structured generation with a focus on 
+    performance and portability, it offers a convenient way to build regular expressions 
+    from JSON schemas and construct an Index object by combining a Vocabulary and regular 
+    expression to efficiently map tokens from a given vocabulary to state transitions in 
+    a finite-state automation
 
+  license: Apache-2.0
+  license_file: 
+    - LICENSE
+    - THIRDPARTY.yml
+  dev_url: https://github.com/dottxt-ai/outlines-core
+  doc_url: https://github.com/dottxt-ai/outlines-core
 extra:
-  anaconda-services:
-    ref: https://anaconda.zendesk.com/agent/tickets/49522
-    reason: Dependency for vllm
   recipe-maintainers:
     - ianaobi
     - bkreider

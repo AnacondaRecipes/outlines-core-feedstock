@@ -1,13 +1,4 @@
-aggregate_check: false
-
-upload_without_merge: true
-
-content_signing: {'win-64': False}
-#mark_private: True
-
-upload_channels:
-  - services
-
 channels:
-  - services
- # - services-build-deps
+  - https://staging.continuum.io/preprod-pbp/fs/rust-feedstock/pr23/aa30b2b
+  - https://staging.continuum.io/preprod-pbp/fs/rust-activation-feedstock/pr20/65b115d
+  - https://staging.continuum.io/pbp/fs/interegular-feedstock/pr2/6100888

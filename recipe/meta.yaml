@@ -50,8 +50,17 @@ test:
     - outlines_core
   commands:
     - pip check
+    - pytest -v .
   requires:
+    - pytest
+    - pydantic
     - pip
+    - numpy
+    - pytorch
+    - llama.cpp
+    - scipy
+    - sentencepiece
+    - transformers
 
 about:
   home: https://github.com/dottxt-ai/outlines-core

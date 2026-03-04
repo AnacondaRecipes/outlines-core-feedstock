@@ -17,20 +17,16 @@ build:
     - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
     - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 1
-  ignore_run_exports_from:
-    - {{ compiler('cxx') }}
 
 requirements:
   build:
     - {{ compiler('rust') }}
     - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
     - {{ stdlib('c') }}
     - cargo-bundle-licenses
     - pkg-config
     
   host:
-
     - python
     - pip
     # setuptools and setuptools-scm pinned based on pyproject.toml: https://github.com/dottxt-ai/outlines-core/blob/0.1.26/pyproject.toml
@@ -39,7 +35,6 @@ requirements:
     - setuptools-rust
     - wheel
   run:
-    - python
     - interegular
     - jsonschema
 

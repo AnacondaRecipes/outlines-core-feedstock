@@ -10,8 +10,8 @@ source:
   sha256: 481c4301341e77cc8f1832d616784adb4d461b4fec65878e7c0d2cba7163a189
 
 build:
-  # limited by at least one rust package PyO3, that is pinned to a version that only supports up to Python 3.13
-  skip: true # [ py<310 or py>313]
+  # limited package, intereggular
+  skip: true # [py<310 or py>=314]
 
   script: 
     - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
@@ -74,6 +74,7 @@ about:
     a finite-state automation
 
   license: Apache-2.0
+  license_family: Apache
   license_file: 
     - LICENSE
     - THIRDPARTY.yml
@@ -83,5 +84,4 @@ extra:
   recipe-maintainers:
     - ianaobi
     - bkreider
-  recipe-maintainers:
     - pavelzw

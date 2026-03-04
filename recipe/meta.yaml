@@ -25,7 +25,6 @@ requirements:
     - {{ stdlib('c') }}
     - cargo-bundle-licenses
     - pkg-config
-    
   host:
     - python
     - pip
@@ -35,6 +34,7 @@ requirements:
     - setuptools-rust
     - wheel
   run:
+    - python
     - interegular
     - jsonschema
 

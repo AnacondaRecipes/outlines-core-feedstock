@@ -1,0 +1,82 @@
+{% set name = "outlines-core" %}
+{% set version = "0.1.26" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/outlines_core-{{ version }}.tar.gz
+  sha256: 481c4301341e77cc8f1832d616784adb4d461b4fec65878e7c0d2cba7163a189
+
+build:
+  # limited package, intereggular
+  skip: true # [py<310 or py>=314]
+
+  script: 
+    - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
+    - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  build:
+    - {{ compiler('rust') }}
+    - {{ compiler('c') }}
+    - {{ stdlib('c') }}
+    - cargo-bundle-licenses
+    - pkg-config
+  host:
+    - python
+    - pip
+    # setuptools and setuptools-scm pinned based on pyproject.toml: https://github.com/dottxt-ai/outlines-core/blob/0.1.26/pyproject.toml
+    - setuptools >45
+    - setuptools-scm >=6.2
+    - setuptools-rust
+    - wheel
+  run:
+    - python
+    - interegular
+    - jsonschema
+
+test:
+  source_files:
+    - tests/
+  imports:
+    - outlines_core
+  commands:
+    - pip check
+    - pytest -v .
+  requires:
+    - pytest
+    - pydantic
+    - pip
+    - numpy
+    - pytorch
+    - llama.cpp
+    - scipy
+    - sentencepiece
+    - transformers
+
+about:
+  home: https://github.com/dottxt-ai/outlines-core
+  
+  summary: Probabilistic Generative Model Programming
+  description: |
+    This package provides the core functionality for structured generation with a focus on 
+    performance and portability, it offers a convenient way to build regular expressions 
+    from JSON schemas and construct an Index object by combining a Vocabulary and regular 
+    expression to efficiently map tokens from a given vocabulary to state transitions in 
+    a finite-state automation
+
+  license: Apache-2.0
+  license_family: Apache
+  license_file: 
+    - LICENSE
+    - THIRDPARTY.yml
+  dev_url: https://github.com/dottxt-ai/outlines-core
+  doc_url: https://github.com/dottxt-ai/outlines-core
+extra:
+  recipe-maintainers:
+    - ianaobi
+    - bkreider
+    - pavelzw

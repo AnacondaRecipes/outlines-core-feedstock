@@ -13,6 +13,17 @@ build:
   # Upstream pyproject.toml requires-python = ">=3.8"; the 0.2.x series ships
   # cp310-cp314 wheels on PyPI, so support py3.10 through py3.14.
   skip: true  # [py<310]
+  # Disable Cargo's default features. Upstream Cargo.toml sets
+  # `default = ["hugginface-hub"]`, which activates `hf-hub` (with `rustls-tls`)
+  # and `tokenizers/http,rustls-tls`. Those pull in `rustls` → `aws-lc-rs` →
+  # `aws-lc-sys`, whose C build script fails on win-64 with a missing
+  # jitterentropy submodule. The `[tool.maturin].features = ["python-bindings"]`
+  # entry in pyproject.toml does NOT disable defaults — it only adds; cargo
+  # still builds the default feature set. Passing `--no-default-features`
+  # through to maturin's PEP517 hook restricts the build to `python-bindings`
+  # only (the pyo3 extension we actually ship), dropping the entire TLS chain.
+  script_env:
+    - MATURIN_PEP517_ARGS=--no-default-features
   script:
     - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
     - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
@@ -31,9 +42,10 @@ requirements:
     # Upstream 0.2.x switched build backend from setuptools-rust to maturin
     # (https://github.com/dottxt-ai/outlines-core/blob/0.2.14/pyproject.toml#L1-L3).
     - maturin >=1.0,<2.0
-    # The hf-hub Rust crate (optional, ureq+rustls-tls features) and the
-    # tokenizers Rust crate (required, =0.22.2) both link openssl on unix.
-    - openssl  # [unix]
+    # No `openssl` here — with `--no-default-features` above, the only Rust
+    # deps activated are pyo3 + serde-pyobject (via `python-bindings`) plus
+    # `tokenizers =0.22.2` with `features = ["onig"]` only. None of those
+    # link openssl.
   run:
     - python
     # No Python-level runtime deps: 0.2.x dropped interegular and jsonschema
@@ -47,7 +59,18 @@ test:
     - outlines_core
   commands:
     - pip check
-    - pytest -v tests/
+    # test_guide.py, test_vocabulary.py, and test_kernels.py all call
+    # `transformers.AutoTokenizer.from_pretrained("gpt2")`, which requires a
+    # live download from huggingface.co. PBP test workers don't have outbound
+    # network access to the HF CDN, so collection fails with "DNS Failed".
+    # We run the offline subset; the upstream CI matrix covers the network
+    # tests against real model artifacts already.
+    - >
+      pytest -v
+      --ignore=tests/test_guide.py
+      --ignore=tests/test_vocabulary.py
+      --ignore=tests/test_kernels.py
+      tests/
   requires:
     - pip
     # Test extras mirrored from upstream 0.2.14 pyproject.toml [project.optional-dependencies.test]:

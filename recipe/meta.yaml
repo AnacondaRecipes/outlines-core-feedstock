@@ -1,5 +1,5 @@
 {% set name = "outlines-core" %}
-{% set version = "0.1.26" %}
+{% set version = "0.2.14" %}
 
 package:
   name: {{ name|lower }}
@@ -7,13 +7,13 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/outlines_core-{{ version }}.tar.gz
-  sha256: 481c4301341e77cc8f1832d616784adb4d461b4fec65878e7c0d2cba7163a189
+  sha256: 64808deed1591ca3029ff64346ceb974cd5d780c916ea82504951fe83523039e
 
 build:
-  # limited package, intereggular
-  skip: true # [py<310 or py>=314]
-
-  script: 
+  # Upstream pyproject.toml requires-python = ">=3.8"; the 0.2.x series ships
+  # cp310-cp314 wheels on PyPI, so support py3.10 through py3.14.
+  skip: true  # [py<310]
+  script:
     - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
     - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
@@ -28,15 +28,17 @@ requirements:
   host:
     - python
     - pip
-    # setuptools and setuptools-scm pinned based on pyproject.toml: https://github.com/dottxt-ai/outlines-core/blob/0.1.26/pyproject.toml
-    - setuptools >45
-    - setuptools-scm >=6.2
-    - setuptools-rust
-    - wheel
+    # Upstream 0.2.x switched build backend from setuptools-rust to maturin
+    # (https://github.com/dottxt-ai/outlines-core/blob/0.2.14/pyproject.toml#L1-L3).
+    - maturin >=1.0,<2.0
+    # The hf-hub Rust crate (optional, ureq+rustls-tls features) and the
+    # tokenizers Rust crate (required, =0.22.2) both link openssl on unix.
+    - openssl  # [unix]
   run:
     - python
-    - interegular
-    - jsonschema
+    # No Python-level runtime deps: 0.2.x dropped interegular and jsonschema
+    # (the 0.1.x recipe carried them; upstream's requires_dist for 0.2.14 is
+    # test-extras-only — `requires_dist` lists only `extra == "test"` entries).
 
 test:
   source_files:
@@ -45,36 +47,43 @@ test:
     - outlines_core
   commands:
     - pip check
-    - pytest -v .
+    - pytest -v tests/
   requires:
-    - pytest
-    - pydantic
     - pip
+    # Test extras mirrored from upstream 0.2.14 pyproject.toml [project.optional-dependencies.test]:
+    - pytest
+    - pytest-benchmark
+    - pytest-mock
+    - pydantic
     - numpy
-    - pytorch
-    - llama.cpp
     - scipy
-    - sentencepiece
+    - pytorch
     - transformers
+    - datasets
+    - sentencepiece
+    # numba is required by the imported `outlines_core.kernels.numpy` module's
+    # check at test time; without it `import outlines_core.kernels.numpy`
+    # raises ImportError (conda-forge hit the same issue).
+    - numba
 
 about:
   home: https://github.com/dottxt-ai/outlines-core
-  
-  summary: Probabilistic Generative Model Programming
+  summary: Structured Text Generation in Rust
   description: |
-    This package provides the core functionality for structured generation with a focus on 
-    performance and portability, it offers a convenient way to build regular expressions 
-    from JSON schemas and construct an Index object by combining a Vocabulary and regular 
-    expression to efficiently map tokens from a given vocabulary to state transitions in 
-    a finite-state automation
-
+    This package provides the core functionality for structured generation
+    with a focus on performance and portability. It offers a convenient way
+    to build regular expressions from JSON schemas and construct an Index
+    object by combining a Vocabulary and regular expression to efficiently
+    map tokens from a given vocabulary to state transitions in a finite-state
+    automaton.
   license: Apache-2.0
   license_family: Apache
-  license_file: 
+  license_file:
     - LICENSE
     - THIRDPARTY.yml
   dev_url: https://github.com/dottxt-ai/outlines-core
   doc_url: https://github.com/dottxt-ai/outlines-core
+
 extra:
   recipe-maintainers:
     - ianaobi

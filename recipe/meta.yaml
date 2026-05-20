@@ -1,19 +1,30 @@
 {% set name = "outlines-core" %}
-{% set version = "0.1.26" %}
+{% set version = "0.2.14" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/outlines_core-{{ version }}.tar.gz
-  sha256: 481c4301341e77cc8f1832d616784adb4d461b4fec65878e7c0d2cba7163a189
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name | replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: 64808deed1591ca3029ff64346ceb974cd5d780c916ea82504951fe83523039e
 
 build:
-  # limited package, intereggular
-  skip: true # [py<310 or py>=314]
-
-  script: 
+  # Upstream pyproject.toml requires-python = ">=3.8"; the 0.2.x series ships
+  # cp310-cp314 wheels on PyPI, so support py3.10 through py3.14.
+  skip: true  # [py<310]
+  # Disable Cargo's default features. Upstream Cargo.toml sets
+  # `default = ["hugginface-hub"]`, which activates `hf-hub` (with `rustls-tls`)
+  # and `tokenizers/http,rustls-tls`. Those pull in `rustls` → `aws-lc-rs` →
+  # `aws-lc-sys`, whose C build script fails on win-64 with a missing
+  # jitterentropy submodule. The `[tool.maturin].features = ["python-bindings"]`
+  # entry in pyproject.toml does NOT disable defaults — it only adds; cargo
+  # still builds the default feature set. Passing `--no-default-features`
+  # through to maturin's PEP517 hook restricts the build to `python-bindings`
+  # only (the pyo3 extension we actually ship), dropping the entire TLS chain.
+  script_env:
+    - MATURIN_PEP517_ARGS=--no-default-features
+  script:
     - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
     - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
@@ -28,15 +39,18 @@ requirements:
   host:
     - python
     - pip
-    # setuptools and setuptools-scm pinned based on pyproject.toml: https://github.com/dottxt-ai/outlines-core/blob/0.1.26/pyproject.toml
-    - setuptools >45
-    - setuptools-scm >=6.2
-    - setuptools-rust
-    - wheel
+    # Upstream 0.2.x switched build backend from setuptools-rust to maturin
+    # (https://github.com/dottxt-ai/outlines-core/blob/0.2.14/pyproject.toml#L1-L3).
+    - maturin >=1.0,<2.0
+    # No `openssl` here — with `--no-default-features` above, the only Rust
+    # deps activated are pyo3 + serde-pyobject (via `python-bindings`) plus
+    # `tokenizers =0.22.2` with `features = ["onig"]` only. None of those
+    # link openssl.
   run:
     - python
-    - interegular
-    - jsonschema
+    # No Python-level runtime deps: 0.2.x dropped interegular and jsonschema
+    # (the 0.1.x recipe carried them; upstream's requires_dist for 0.2.14 is
+    # test-extras-only — `requires_dist` lists only `extra == "test"` entries).
 
 test:
   source_files:
@@ -45,36 +59,54 @@ test:
     - outlines_core
   commands:
     - pip check
-    - pytest -v .
+    # test_guide.py, test_vocabulary.py, and test_kernels.py all call
+    # `transformers.AutoTokenizer.from_pretrained("gpt2")`, which requires a
+    # live download from huggingface.co. PBP test workers don't have outbound
+    # network access to the HF CDN, so collection fails with "DNS Failed".
+    # We run the offline subset; the upstream CI matrix covers the network
+    # tests against real model artifacts already.
+    - >
+      pytest -v
+      --ignore=tests/test_guide.py
+      --ignore=tests/test_vocabulary.py
+      --ignore=tests/test_kernels.py
+      tests/
   requires:
-    - pytest
-    - pydantic
     - pip
+    # Test extras mirrored from upstream 0.2.14 pyproject.toml [project.optional-dependencies.test]:
+    - pytest
+    - pytest-benchmark
+    - pytest-mock
+    - pydantic
     - numpy
-    - pytorch
-    - llama.cpp
     - scipy
-    - sentencepiece
+    - pytorch
     - transformers
+    - datasets
+    - sentencepiece
+    # numba is required by the imported `outlines_core.kernels.numpy` module's
+    # check at test time; without it `import outlines_core.kernels.numpy`
+    # raises ImportError (conda-forge hit the same issue).
+    - numba
 
 about:
   home: https://github.com/dottxt-ai/outlines-core
-  
-  summary: Probabilistic Generative Model Programming
+  summary: Structured Text Generation in Rust
   description: |
-    This package provides the core functionality for structured generation with a focus on 
-    performance and portability, it offers a convenient way to build regular expressions 
-    from JSON schemas and construct an Index object by combining a Vocabulary and regular 
-    expression to efficiently map tokens from a given vocabulary to state transitions in 
-    a finite-state automation
-
+    This package provides the core functionality for structured generation
+    with a focus on performance and portability. It offers a convenient way
+    to build regular expressions from JSON schemas and construct an Index
+    object by combining a Vocabulary and regular expression to efficiently
+    map tokens from a given vocabulary to state transitions in a finite-state
+    automaton.
   license: Apache-2.0
   license_family: Apache
-  license_file: 
+  license_file:
     - LICENSE
     - THIRDPARTY.yml
   dev_url: https://github.com/dottxt-ai/outlines-core
   doc_url: https://github.com/dottxt-ai/outlines-core
+
 extra:
   recipe-maintainers:
     - ianaobi
